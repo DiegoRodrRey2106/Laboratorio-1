@@ -1,0 +1,125 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define SIZE 4
+
+void printBoard(char board[SIZE][SIZE]) {
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            printf("%c", board[i][j]);
+            if (j < SIZE - 1) printf(" | ");
+        }
+        printf("\n");
+        if (i < SIZE - 1) {
+            for (int j = 0; j < SIZE - 1; j++) printf("---+");
+            printf("---\n");
+        }
+    }
+    printf("\n");
+}
+
+int checkWinner(char board[SIZE][SIZE], char player) {
+    // Check rows and columns
+    for (int i = 0; i < SIZE; i++) {
+        int rowWin = 1, colWin = 1;
+        for (int j = 0; j < SIZE; j++) {
+            if (board[i][j] != player) rowWin = 0;
+            if (board[j][i] != player) colWin = 0;
+        }
+        if (rowWin || colWin) return 1;
+    }
+
+    // Check diagonals
+    int diagWin1 = 1, diagWin2 = 1;
+    for (int i = 0; i < SIZE; i++) {
+        if (board[i][i] != player) diagWin1 = 0;
+        if (board[i][SIZE - 1 - i] != player) diagWin2 = 0;
+    }
+
+    return diagWin1 || diagWin2;
+}
+
+int checkFull(char board[SIZE][SIZE]) {
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            if (board[i][j] == ' ') return 0;
+        }
+    }
+    return 1;
+}
+
+void playerMove(char board[SIZE][SIZE]) {
+    int row, col;
+    while (1) {
+        printf("Enter row and column (0-3) separated by space: ");
+        scanf("%d %d", &row, &col);
+        if (row >= 0 && row < SIZE && col >= 0 && col < SIZE && board[row][col] == ' ') {
+            board[row][col] = 'X';
+            break;
+        } else {
+            printf("Invalid move, try again.\n");
+        }
+    }
+}
+
+void aiMove(char board[SIZE][SIZE]) {
+    int emptyCells[SIZE * SIZE][2];
+    int count = 0;
+
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            if (board[i][j] == ' ') {
+                emptyCells[count][0] = i;
+                emptyCells[count][1] = j;
+                count++;
+            }
+        }
+    }
+
+    if (count > 0) {
+        int choice = rand() % count;
+        board[emptyCells[choice][0]][emptyCells[choice][1]] = 'O';
+    }
+}
+
+int main() {
+    char board[SIZE][SIZE];
+    srand(time(0));  // Seed for random number generation
+
+    // Initialize the board
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            board[i][j] = ' ';
+        }
+    }
+
+    printf("Welcome to 4x4 Tic-Tac-Toe!\n");
+    printBoard(board);
+
+    while (1) {
+        playerMove(board);
+        printBoard(board);
+        if (checkWinner(board, 'X')) {
+            printf("Congratulations! You win!\n");
+            break;
+        }
+        if (checkFull(board)) {
+            printf("It's a tie!\n");
+            break;
+        }
+
+aiMove(board);
+        printBoard(board);
+        if (checkWinner(board, 'O')) {
+            printf("AI wins!\n");
+            break;
+        }
+        if (checkFull(board)) {
+            printf("It's a tie!\n");
+            break;
+        }
+    }
+
+    return 0;
+}
